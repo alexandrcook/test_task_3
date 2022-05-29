@@ -2,85 +2,65 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreCommentRequest;
-use App\Http\Requests\UpdateCommentRequest;
+use App\Http\Requests\PostCommentStoreRequest;
+use App\Http\Resources\BlogResource;
+use App\Http\Resources\CommentResource;
+use App\Http\Resources\PostResource;
+use App\Models\Blog;
 use App\Models\Comment;
+use App\Models\Post;
+use Illuminate\Http\Request;
 
 class CommentController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Force remove the specified resource from storage.
      *
-     * @return \Illuminate\Http\Response
+     * @param  int  $comment
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function index()
+    public function destroy($comment_id)
     {
-        //
-    }
+        $comment = Comment::onlyTrashed()->where('id', $comment_id)->first();
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
+        $comment->forceDelete();
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \App\Http\Requests\StoreCommentRequest  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(StoreCommentRequest $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Comment  $comment
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Comment $comment)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Comment  $comment
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Comment $comment)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \App\Http\Requests\UpdateCommentRequest  $request
-     * @param  \App\Models\Comment  $comment
-     * @return \Illuminate\Http\Response
-     */
-    public function update(UpdateCommentRequest $request, Comment $comment)
-    {
-        //
+        return response()->json([
+            'removed' => true,
+            'trashedBlogs' => BlogResource::collection(Blog::onlyTrashed()->get()),
+            'trashedPosts' => PostResource::collection(Post::onlyTrashed()->get()),
+            'trashedComments' => CommentResource::collection(Comment::onlyTrashed()->get())
+        ]);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Comment  $comment
-     * @return \Illuminate\Http\Response
+     * @param  int  $comment
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function destroy(Comment $comment)
+    public function delete(Comment $comment)
     {
-        //
+        $comment->delete();
+
+        return response()->json([
+            'removed' => true
+        ]);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $comment
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function restore($comment_id)
+    {
+        $comment = Comment::onlyTrashed()->where('id', $comment_id)->first();
+        $comment->restore();
+
+        return response()->json([
+            'restored' => true
+        ]);
     }
 }

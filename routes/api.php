@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,4 +15,43 @@ use Illuminate\Support\Facades\Route;
 
 //Create a simple login/register page for the user
 
-Route::get('/', []);
+//Auth::routes();
+
+Route::post('/register', [\App\Http\Controllers\API\CustomRegisterController::class, 'register'])->name('api.register');
+Route::post('/login', [\App\Http\Controllers\API\CustomLoginController::class, 'login'])->name('api.login');
+
+Route::resource('blogs', \App\Http\Controllers\BlogController::class)
+    ->only(['index','show']);
+
+Route::resource('posts', \App\Http\Controllers\PostController::class)
+    ->only(['index','show']);
+
+
+Route::group(['middleware' => 'auth:sanctum'], function (){
+    //get blogs list for specific user
+    Route::post('/user/blogs', [\App\Http\Controllers\BlogController::class, 'getUserBlogs']);
+
+    Route::resource('blogs', \App\Http\Controllers\BlogController::class)
+        ->except(['index','show','destroy', 'delete', 'restore']);
+
+    Route::resource('posts', \App\Http\Controllers\PostController::class)
+        ->except(['index','show','destroy', 'delete', 'restore']);
+
+    Route::resource('posts.comments', \App\Http\Controllers\PostCommentController::class)
+    ->only(['store']);
+
+});
+
+Route::group(['middleware' => ['auth:sanctum', 'ability:admin']], function (){
+
+    Route::resource('blogs', \App\Http\Controllers\BlogController::class)
+        ->only(['destroy', 'delete', 'restore']);
+
+    Route::resource('posts', \App\Http\Controllers\PostController::class)
+        ->only(['destroy', 'delete', 'restore']);
+
+    Route::resource('comments', \App\Http\Controllers\CommentController::class)
+        ->only(['destroy', 'delete', 'restore']);
+
+    Route::post('/trashed', [\App\Http\Controllers\TrashController::class, 'getTrashedItems']);
+});

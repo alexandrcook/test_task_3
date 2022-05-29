@@ -11,6 +11,8 @@ class Comment extends Model
 {
     use HasFactory, SoftDeletes, Prunable;
 
+    protected $fillable = ['post_id', 'user_id', 'message'];
+
     public function user()
     {
         return $this->belongsTo(User::class);

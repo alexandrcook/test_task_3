@@ -13,6 +13,16 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
+//Route::get('/', function () {
+//    return view('welcome');
+//});
+//
+//Route::get('/login', [\App\Http\Controllers\Auth\LoginController::class, 'showLoginForm'])->name('login');
+//Route::get('/register', [\App\Http\Controllers\Auth\RegisterController::class, 'showRegistrationForm'])->name('register');
+//
+//Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+
+Route::get('/{first?}/{second?}/{third?}/{is_there_way_to_make_it_nicer?}', function () {
     return view('welcome');
 });

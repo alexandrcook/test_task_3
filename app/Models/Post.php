@@ -11,6 +11,10 @@ class Post extends Model
 {
     use HasFactory, SoftDeletes, Prunable;
 
+    protected $perPage = 5;
+
+    protected $fillable = ['blog_id', 'subject', 'body'];
+
     public function blog()
     {
         return $this->belongsTo(Blog::class);
