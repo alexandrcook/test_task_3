@@ -1,4 +1,20 @@
-# Back-end Assignment
+# Commands to run project with Docker
+
+./vendor/bin/sail up
+<br>
+./vendor/bin/sail npm install
+<br>
+./vendor/bin/sail npm run dev
+<br>
+open 'localhost:3000' in browser
+
+# Commands to run project without Docker
+
+install docker
+<br>
+continue with instructions above :)
+
+# Task's requirements
 
 Business Requirements
 
