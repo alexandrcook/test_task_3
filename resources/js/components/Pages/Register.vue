@@ -116,8 +116,10 @@ export default {
                     });
                 }
 
-                if(data.success){
-                    this.$root.user.api_token = data.api_token;
+                if(data.data){
+                    this.$root.user.api_token = data.data.api_token;
+                    this.$root.user.is_admin = data.data.is_admin;
+                    this.$root.user.id = data.data.user_id;
                     this.$router.push({name: 'home'});
                 }
 

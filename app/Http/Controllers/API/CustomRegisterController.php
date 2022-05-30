@@ -31,11 +31,10 @@ class CustomRegisterController extends Controller
             ['password' => Hash::make(request()->get('password'))]
         ));
 
-        if(
-            $request->has('address')
-            || $request->has('city')
-            || $request->has('state')
-            || $request->has('zipcode')
+        if($request->has('address') && $request->get('address')
+            || $request->has('city') && $request->get('city')
+            || $request->has('state') && $request->get('state')
+            || $request->has('zipcode') && $request->get('zipcode')
         ){
             UserAddress::create(
                 array_merge(

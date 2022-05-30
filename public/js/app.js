@@ -1324,6 +1324,13 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "Post",
   data: function data() {
@@ -1916,8 +1923,10 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                   });
                 }
 
-                if (data.success) {
-                  _this.$root.user.api_token = data.api_token;
+                if (data.data) {
+                  _this.$root.user.api_token = data.data.api_token;
+                  _this.$root.user.is_admin = data.data.is_admin;
+                  _this.$root.user.id = data.data.user_id;
 
                   _this.$router.push({
                     name: 'home'
@@ -4050,6 +4059,42 @@ var render = function () {
                   "]/"
               ),
             ]),
+            _vm._v(" "),
+            _c("div", { staticClass: "card-title" }, [
+              _vm._v("\n                Author "),
+              _vm.post && _vm.post.blog.user.username
+                ? _c("span", [
+                    _vm._v("[" + _vm._s(_vm.post.blog.user.username) + "]"),
+                  ])
+                : _vm._e(),
+              _vm._v(" info:\n            "),
+            ]),
+            _vm._v(" "),
+            _vm.post && _vm.post.blog.user.name
+              ? _c("div", { staticClass: "card-title" }, [
+                  _vm._v("name: " + _vm._s(_vm.post.blog.user.name)),
+                ])
+              : _vm._e(),
+            _vm._v(" "),
+            _vm.post && _vm.post.blog.user.surname
+              ? _c("div", { staticClass: "card-title" }, [
+                  _vm._v("surname: " + _vm._s(_vm.post.blog.user.surname)),
+                ])
+              : _vm._e(),
+            _vm._v(" "),
+            _vm.post && _vm.post.blog.user.nickname
+              ? _c("div", { staticClass: "card-title" }, [
+                  _vm._v(
+                    "nickname: *" + _vm._s(_vm.post.blog.user.nickname) + "*"
+                  ),
+                ])
+              : _vm._e(),
+            _vm._v(" "),
+            _vm.post && _vm.post.blog.user.email
+              ? _c("div", { staticClass: "card-title" }, [
+                  _vm._v("email: " + _vm._s(_vm.post.blog.user.email)),
+                ])
+              : _vm._e(),
             _vm._v(" "),
             _c("hr"),
             _vm._v(" "),
