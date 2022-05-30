@@ -2,19 +2,19 @@
 
 (should be run in root folder)
 <br>
-./vendor/bin/sail up
+composer install
 <br>
-./vendor/bin/sail composer install
+./vendor/bin/sail up -d
 <br>
 ./vendor/bin/sail php artisan migrate
 <br>
 ./vendor/bin/sail php artisan db:seed
 <br>
-./vendor/bin/sail php artisan schedule:work
-<br>
 ./vendor/bin/sail npm install
 <br>
 ./vendor/bin/sail npm run dev
+<br>
+./vendor/bin/sail php artisan schedule:work
 <br>
 open 'localhost' in browser
 <br>
