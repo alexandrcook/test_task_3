@@ -4,6 +4,8 @@
 <br>
 ./vendor/bin/sail up
 <br>
+./vendor/bin/sail composer install
+<br>
 ./vendor/bin/sail php artisan migrate
 <br>
 ./vendor/bin/sail php artisan db:seed

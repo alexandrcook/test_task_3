@@ -13,12 +13,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-//Create a simple login/register page for the user
-
-//Auth::routes();
-
-Route::post('/register', [\App\Http\Controllers\API\CustomRegisterController::class, 'register'])->name('api.register');
-Route::post('/login', [\App\Http\Controllers\API\CustomLoginController::class, 'login'])->name('api.login');
+Route::post('/register', [\App\Http\Controllers\Auth\CustomRegisterController::class, 'register'])->name('api.register');
+Route::post('/login', [\App\Http\Controllers\Auth\CustomLoginController::class, 'login'])->name('api.login');
 
 Route::resource('blogs', \App\Http\Controllers\BlogController::class)
     ->only(['index','show']);
