@@ -22,7 +22,6 @@ open 'localhost' in browser
 Please, use next credentials
 
 - login: admin@admin.admin
-<br>
 - pass: admin
 <br>
 
