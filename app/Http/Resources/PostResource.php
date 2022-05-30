@@ -15,14 +15,15 @@ class PostResource extends JsonResource
     public function toArray($request)
     {
         return [
-          'id' => $this->id,
-          'blog_id' => $this->blog_id,
-          'blog' => new BlogResource($this->whenLoaded('blog')),
-          'comments' => CommentResource::collection($this->whenLoaded('comments')),
-          'subject' => $this->subject,
-          'body' => $this->body,
-          'created_at' => $this->created_at->format('Y-m-d H:m:s'),
-          'updated_at' => $this->updated_at
+            'id' => $this->id,
+            'blog_id' => $this->blog_id,
+            'blog' => new BlogResource($this->whenLoaded('blog')),
+            'comments' => CommentResource::collection($this->whenLoaded('comments')),
+            'subject' => $this->subject,
+            'body' => $this->body,
+            'created_at' => $this->created_at->format('Y-m-d H:m:s'),
+            'updated_at' => $this->updated_at->format('Y-m-d H:m:s'),
+            'deleted_at' => $this->updated_at->format('Y-m-d H:m:s')
         ];
     }
 }

@@ -66,6 +66,7 @@
                             id: {{blog.id}} - {{blog.name.slice(0,20)}}...
                         </div>
                         <div class="d-flex">
+                            <div class="mt-2 mr-2">(deleted at {{blog.deleted_at}})</div>
                             <form @submit.prevent="restore('blog', blog.id)">
                                 <button type="submit" class="btn btn-success mr-2">Restore</button>
                             </form>
@@ -79,7 +80,6 @@
                 <hr>
             </div>
 
-            {{this.trashedItems.posts.length}}
             <div v-if="this.trashedItems.posts.length">
                 <hr>
                 <h5>Trashed Posts List [{{this.trashedItems.posts.length}}]:</h5>
@@ -90,6 +90,7 @@
                             id: {{post.id}} - {{post.body.slice(0,20)}}...
                         </div>
                         <div class="d-flex">
+                            <div class="mt-2 mr-2">(deleted at {{post.deleted_at}})</div>
                             <form @submit.prevent="restore('post', post.id)">
                                 <button type="submit" class="btn btn-success mr-2">Restore</button>
                             </form>
@@ -113,6 +114,7 @@
                             id: {{comment.id}} - {{comment.message.slice(0,20)}}...
                         </div>
                         <div class="d-flex">
+                            <div class="mt-2 mr-2">(deleted at {{comment.deleted_at}})</div>
                             <form @submit.prevent="restore('comment', comment.id)">
                                 <button type="submit" class="btn btn-success mr-2">Restore</button>
                             </form>

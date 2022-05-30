@@ -1,12 +1,31 @@
 # Commands to run project with Docker
 
+(should be run in root folder)
+<br>
 ./vendor/bin/sail up
+<br>
+./vendor/bin/sail php artisan migrate
+<br>
+./vendor/bin/sail php artisan db:seed
+<br>
+./vendor/bin/sail php artisan schedule:work
 <br>
 ./vendor/bin/sail npm install
 <br>
 ./vendor/bin/sail npm run dev
 <br>
-open 'localhost:3000' in browser
+open 'localhost' in browser
+<br>
+
+Please, use next credentials
+
+- login: admin@admin.admin
+<br>
+- pass: admin
+<br>
+
+to login as 'admin' or create new regular user on 'Register' page
+
 
 # Commands to run project without Docker
 

@@ -340,6 +340,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "Account",
   data: function data() {
@@ -3483,6 +3485,12 @@ var render = function () {
                           ]),
                           _vm._v(" "),
                           _c("div", { staticClass: "d-flex" }, [
+                            _c("div", { staticClass: "mt-2 mr-2" }, [
+                              _vm._v(
+                                "(deleted at " + _vm._s(blog.deleted_at) + ")"
+                              ),
+                            ]),
+                            _vm._v(" "),
                             _c(
                               "form",
                               {
@@ -3537,11 +3545,7 @@ var render = function () {
                 2
               )
             : _vm._e(),
-          _vm._v(
-            "\n\n        " +
-              _vm._s(this.trashedItems.posts.length) +
-              "\n        "
-          ),
+          _vm._v(" "),
           this.trashedItems.posts.length
             ? _c(
                 "div",
@@ -3575,6 +3579,12 @@ var render = function () {
                           ]),
                           _vm._v(" "),
                           _c("div", { staticClass: "d-flex" }, [
+                            _c("div", { staticClass: "mt-2 mr-2" }, [
+                              _vm._v(
+                                "(deleted at " + _vm._s(post.deleted_at) + ")"
+                              ),
+                            ]),
+                            _vm._v(" "),
                             _c(
                               "form",
                               {
@@ -3663,6 +3673,14 @@ var render = function () {
                           ]),
                           _vm._v(" "),
                           _c("div", { staticClass: "d-flex" }, [
+                            _c("div", { staticClass: "mt-2 mr-2" }, [
+                              _vm._v(
+                                "(deleted at " +
+                                  _vm._s(comment.deleted_at) +
+                                  ")"
+                              ),
+                            ]),
+                            _vm._v(" "),
                             _c(
                               "form",
                               {
