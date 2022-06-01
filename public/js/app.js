@@ -3059,7 +3059,7 @@ var render = function () {
             },
             [
               _vm._v(
-                "See all blog posts (" + _vm._s(_vm.blog.posts.length) + ")"
+                "See all blog posts (" + _vm._s(_vm.blog.posts_count) + ")"
               ),
             ]
           ),

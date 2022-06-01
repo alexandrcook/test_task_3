@@ -90,7 +90,9 @@ class PostController extends Controller
 
         return (new PostResource(
             Post::where('id',$id)
-            ->with('blog')
+            ->with(['blog' => function($q){
+                return $q->with('user');
+            }])
             ->first()
         ))->additional([
             'commentsData' => (new CommentCollection($commentsChunk))->response()->getData(),

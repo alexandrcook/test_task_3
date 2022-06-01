@@ -35,10 +35,10 @@ class DatabaseSeeder extends Seeder
             $blogs = Blog::factory(10)->create(['user_id' => $user->id]);
 
             foreach ($blogs as $blog){
-                $posts = Post::factory(10)->create(['blog_id' => $blog->id]);
+                $posts = Post::factory(20)->create(['blog_id' => $blog->id]);
 
                 foreach ($posts as $post){
-                    Comment::factory(10)->create(['user_id' => $user->id, 'post_id' => $post->id]);
+                    Comment::factory(20)->create(['user_id' => $user->id, 'post_id' => $post->id]);
                 }
             }
         }

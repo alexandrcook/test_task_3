@@ -8,7 +8,7 @@
             <h5 class="card-title">Blog: {{blog.name}}</h5>
             <h5 class="card-title">Author: {{blog.user.name}}</h5>
             <div class="d-flex justify-content-between">
-                <a :href="'/blogs/'+blog.id" class="btn btn-primary">See all blog posts ({{blog.posts.length}})</a>
+                <a :href="'/blogs/'+blog.id" class="btn btn-primary">See all blog posts ({{blog.posts_count}})</a>
                 <div v-if="this.$root.user.is_admin">
                     <form @submit.prevent="removeBlog(blog.id)">
                         <button class="btn btn-danger" type="submit">Remove blog</button>

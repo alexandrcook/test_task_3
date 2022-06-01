@@ -22,19 +22,15 @@ Route::resource('blogs', \App\Http\Controllers\BlogController::class)
 Route::resource('posts', \App\Http\Controllers\PostController::class)
     ->only(['index','show']);
 
-
 Route::group(['middleware' => 'auth:sanctum'], function (){
     //get blogs list for specific user
     Route::post('/user/blogs', [\App\Http\Controllers\BlogController::class, 'getUserBlogs']);
 
-    Route::resource('blogs', \App\Http\Controllers\BlogController::class)
-        ->except(['index','show','destroy', 'delete', 'restore']);
+    Route::resource('blogs', \App\Http\Controllers\BlogController::class)->only(['store']);
 
-    Route::resource('posts', \App\Http\Controllers\PostController::class)
-        ->except(['index','show','destroy', 'delete', 'restore']);
+    Route::resource('posts', \App\Http\Controllers\PostController::class)->only(['store']);
 
-    Route::resource('posts.comments', \App\Http\Controllers\PostCommentController::class)
-    ->only(['store']);
+    Route::resource('posts.comments', \App\Http\Controllers\PostCommentController::class)->only(['store']);
 
 });
 

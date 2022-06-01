@@ -13,33 +13,47 @@ use Tests\TestCase;
 
 class AuthTest extends TestCase
 {
-//    use RefreshDatabase;
+    use RefreshDatabase;
 
     /**
      * A basic test example.
      *
      * @return void
      */
-    public function test_the_user_registered()
+    public function test_the_user_can_register_and_login()
     {
-        $this->withoutExceptionHandling();
+        $generatedPassword= bin2hex(openssl_random_pseudo_bytes(4));
 
-        $user = User::factory()->make([
-            'password' => '123123'
+        $user = User::factory()->make(['password' => $generatedPassword]);
+
+        $registeredResponse = $this->post(route('api.register'), $user->makeVisible('password')->toArray());
+
+        $registeredResponse->assertStatus(200)
+            ->assertJsonStructure(['data' => ['user_id',  'is_admin', 'api_token']]);
+
+        $registeredResponseData = $registeredResponse->getOriginalContent()['data'];
+
+        $this->assertDatabaseHas('users', [
+            'id' => $registeredResponseData['user_id'],
+            'email' => $user->email
         ]);
 
-        $response = $this->post(route('api.register'), $user->makeVisible('password')->toArray());
+        $registeredUser = User::where('id', $registeredResponseData['user_id'])->first();
 
-        $response->assertStatus(200)
-            ->assertJsonStructure(['data' => ['user_id',  'is_admin', 'api_token']])
-            ->assertJsonFragment(
-                [
-                    'is_admin' => false
-                ]
-                //check token length
-                //check user_id returned
-            );
+        $loggedResponse = $this->post(route('api.login'), [
+            'email' => $registeredUser->email,
+            'password' => $generatedPassword
+        ]);
 
-        $this->assertDatabaseHas('users', ['email' => $user->email]);
+        $loggedResponse->assertStatus(200)
+            ->assertJsonStructure(['data' => ['user_id',  'is_admin', 'api_token']]);
+
+        $loggedResponseData = $loggedResponse->getOriginalContent()['data'];
+
+        foreach ([$registeredResponseData, $loggedResponseData] as $data){
+            $this->assertTrue(is_integer($data['user_id']));
+            $this->assertTrue(is_bool($data['is_admin']));
+            $this->assertTrue(is_string($data['api_token']));
+        }
     }
 }

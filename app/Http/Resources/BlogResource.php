@@ -17,8 +17,8 @@ class BlogResource extends JsonResource
         return[
             'id' => $this->id,
             'name' => $this->name,
-            'user' => new UserResource($this->user),
-            'posts' => PostResource::collection($this->whenLoaded('posts')),
+            'user' => new UserResource($this->whenLoaded('user')),
+            'posts_count' => $this->relationLoaded('posts') ? count($this->whenLoaded('posts')) : 0,
             'created_at' => $this->created_at->format('Y-m-d H:m:s'),
             'updated_at' => $this->updated_at->format('Y-m-d H:m:s'),
             'deleted_at' => $this->updated_at->format('Y-m-d H:m:s')

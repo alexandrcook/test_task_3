@@ -19,8 +19,9 @@ class CommentResource extends JsonResource
             'post_id' => $this->post_id,
             'user' => new UserResource($this->whenLoaded('user')),
             'message' => $this->message,
-            'deleted_at' => $this->updated_at->format('Y-m-d H:m:s')
-
+            'created_at' => $this->created_at ? $this->created_at->format('Y-m-d H:m:s') : null,
+            'updated_at' => $this->updated_at ? $this->updated_at->format('Y-m-d H:m:s') : null,
+            'deleted_at' => $this->deleted_at ? $this->deleted_at->format('Y-m-d H:m:s') : null
         ];
     }
 }
