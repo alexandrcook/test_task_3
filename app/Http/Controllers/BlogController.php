@@ -12,6 +12,7 @@ use App\Models\Comment;
 use App\Models\Post;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class BlogController extends Controller
 {
@@ -51,6 +52,14 @@ class BlogController extends Controller
 
     public function show($id)
     {
+        $blog = Blog::where('id', $id)
+            ->with(['user', 'posts'])
+            ->first();
+
+        if(!$blog){
+            throw new NotFoundHttpException();
+        }
+
         $skip_posts_count = request()->get('skip_posts_count');
         $take_posts_count = 10;
 
@@ -68,11 +77,7 @@ class BlogController extends Controller
             ->get()
             ->count();
 
-        return (new BlogResource(
-            Blog::where('id', $id)
-                ->with(['user', 'posts'])
-                ->first()
-        ))->additional([
+        return (new BlogResource($blog))->additional([
             'postsData' => (new PostCollection($paginatedPosts))->response()->getData(),
             'allPostsLoaded' => $allPostsLoaded
         ]);
@@ -99,6 +104,10 @@ class BlogController extends Controller
     public function destroy($blog_id)
     {
         $blog = Blog::onlyTrashed()->where('id', $blog_id)->first();
+
+        if(!$blog){
+            throw new NotFoundHttpException();
+        }
 
         $blog->forceDelete();
 
@@ -141,6 +150,10 @@ class BlogController extends Controller
     public function restore($blog_id)
     {
         $blog = Blog::onlyTrashed()->where('id', $blog_id)->first();
+
+        if(!$blog){
+            throw new NotFoundHttpException();
+        }
 
         $blog->restore();
         foreach($blog->posts()->withTrashed()->get() as $post){
