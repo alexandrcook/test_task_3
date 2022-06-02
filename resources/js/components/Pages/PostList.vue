@@ -1,6 +1,7 @@
 <template>
     <div class="">
-        <h3>All post list</h3>
+        <h3 v-if="posts.items.length">All post list</h3>
+        <h3 v-else>Posts not found...</h3>
         <div v-for="post in posts.items" class="">
             <Post v-bind:post="post" :removePost="removePost"/>
         </div>
