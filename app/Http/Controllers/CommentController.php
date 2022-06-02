@@ -14,9 +14,9 @@ use Illuminate\Http\Request;
 class CommentController extends Controller
 {
     /**
-     * Force remove the specified resource from storage.
+     * Destroy the specified resource.
      *
-     * @param  int  $comment
+     * @param  int  $comment_id
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($comment_id)
@@ -26,15 +26,12 @@ class CommentController extends Controller
         $comment->forceDelete();
 
         return response()->json([
-            'removed' => true,
-            'trashedBlogs' => BlogResource::collection(Blog::onlyTrashed()->get()),
-            'trashedPosts' => PostResource::collection(Post::onlyTrashed()->get()),
-            'trashedComments' => CommentResource::collection(Comment::onlyTrashed()->get())
+            'removed' => true
         ]);
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Soft delete the specified resource.
      *
      * @param  int  $comment
      * @return \Illuminate\Http\JsonResponse
@@ -49,7 +46,7 @@ class CommentController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Restore the specified resource.
      *
      * @param  int  $comment
      * @return \Illuminate\Http\JsonResponse

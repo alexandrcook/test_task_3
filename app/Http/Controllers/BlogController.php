@@ -16,6 +16,11 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class BlogController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Resources\Json\JsonResource
+     */
     public function index()
     {
         $skip_blogs_count = request()->get('skip_blogs_count');
@@ -39,6 +44,12 @@ class BlogController extends Controller
         ]);
     }
 
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  StoreBlogRequest $request
+     * @return \Illuminate\Http\Resources\Json\JsonResource
+     */
     public function store(StoreBlogRequest $request)
     {
         $additionalInputs = ([
@@ -50,9 +61,15 @@ class BlogController extends Controller
         return new BlogResource(Blog::create(array_merge($request->all(), $additionalInputs)));
     }
 
-    public function show($id)
+    /**
+     * Display the specified resource.
+     *
+     * @param int $blog_id
+     * @return \Illuminate\Http\Resources\Json\JsonResource
+     */
+    public function show($blog_id)
     {
-        $blog = Blog::where('id', $id)
+        $blog = Blog::where('id', $blog_id)
             ->with(['user', 'posts'])
             ->first();
 
@@ -63,7 +80,7 @@ class BlogController extends Controller
         $skip_posts_count = request()->get('skip_posts_count');
         $take_posts_count = 10;
 
-        $paginatedPosts = Post::where('blog_id', $id)
+        $paginatedPosts = Post::where('blog_id', $blog_id)
             ->with('comments')
             ->latest()
             ->orderBy('id', 'desc')
@@ -71,7 +88,7 @@ class BlogController extends Controller
             ->take($take_posts_count)
             ->get();
 
-        $allPostsLoaded = !Post::where('blog_id', $id)
+        $allPostsLoaded = !Post::where('blog_id', $blog_id)
             ->skip($skip_posts_count+$take_posts_count+1)
             ->take(1)
             ->get()
@@ -84,21 +101,9 @@ class BlogController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Destroy the specified resource from storage.
      *
-     * @param  \App\Http\Requests\UpdateBlogRequest  $request
-     * @param  \App\Models\Blog  $blog
-     * @return \Illuminate\Http\Response
-     */
-    public function update(UpdateBlogRequest $request, Blog $blog)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Blog  $blog
+     * @param  int  $blog_id
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($blog_id)
@@ -112,18 +117,15 @@ class BlogController extends Controller
         $blog->forceDelete();
 
         return response()->json([
-            'removed' => true,
-            'trashedBlogs' => BlogResource::collection(Blog::onlyTrashed()->get()),
-            'trashedPosts' => PostResource::collection(Post::onlyTrashed()->get()),
-            'trashedComments' => CommentResource::collection(Comment::onlyTrashed()->get())
+            'removed' => true
         ]);
 
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Restore the specified soft deleted resource.
      *
-     * @param  int  $comment
+     * @param  Blog $blog
      * @return \Illuminate\Http\JsonResponse
      */
     public function delete(Blog $blog)
@@ -142,7 +144,7 @@ class BlogController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Soft delete the specified resource from storage.
      *
      * @param  int  $comment
      * @return \Illuminate\Http\JsonResponse
@@ -168,6 +170,13 @@ class BlogController extends Controller
         ]);
     }
 
+
+    /**
+     * Get blogs for the specified user.
+     *
+     * @param  Request $request
+     * @return \Illuminate\Http\Resources\Json\JsonResource
+     */
     public function getUserBlogs(Request $request)
     {
         return BlogResource::collection(Blog::where('user_id', $request->user()->id)->get());

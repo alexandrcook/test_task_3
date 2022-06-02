@@ -7,6 +7,11 @@ use App\Models\{Blog,Comment,Post};
 
 class TrashController extends Controller
 {
+    /**
+     * Display a listing of the trashed resources.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function getTrashedItems()
     {
         return response()->json([

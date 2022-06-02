@@ -45,20 +45,10 @@ class PostController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      *
      * @param  \App\Http\Requests\StorePostRequest  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Resources\Json\JsonResource
      */
     public function store(StorePostRequest $request)
     {
@@ -68,15 +58,15 @@ class PostController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param $id
+     * @param int $post_id
      * @return \Illuminate\Http\Resources\Json\JsonResource
      */
-    public function show($id)
+    public function show($post_id)
     {
         $skip_comments_count = request()->get('skip_comments');
         $take_comments_count = 10;
 
-        $commentsChunk = Comment::where('post_id', $id)
+        $commentsChunk = Comment::where('post_id', $post_id)
             ->with('user')
             ->latest()
             ->orderBy('id', 'desc')
@@ -84,12 +74,12 @@ class PostController extends Controller
             ->take($take_comments_count)
             ->get();
 
-        $allCommentsLoaded = !Comment::where('post_id', $id)
+        $allCommentsLoaded = !Comment::where('post_id', $post_id)
             ->skip($skip_comments_count+$take_comments_count+1)
             ->take(1)->get()->count();
 
         return (new PostResource(
-            Post::where('id',$id)
+            Post::where('id',$post_id)
             ->with(['blog' => function($q){
                 return $q->with('user');
             }])
@@ -101,32 +91,9 @@ class PostController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Destroy the specified resource from storage.
      *
-     * @param  \App\Models\Post  $post
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Post $post)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \App\Http\Requests\UpdatePostRequest  $request
-     * @param  \App\Models\Post  $post
-     * @return \Illuminate\Http\Response
-     */
-    public function update(UpdatePostRequest $request, Post $post)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Post  $post
+     * @param  int  $post_id
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($post_id)
@@ -136,17 +103,14 @@ class PostController extends Controller
         $post->forceDelete();
 
         return response()->json([
-            'removed' => true,
-            'trashedBlogs' => BlogResource::collection(Blog::onlyTrashed()->get()),
-            'trashedPosts' => PostResource::collection(Post::onlyTrashed()->get()),
-            'trashedComments' => CommentResource::collection(Comment::onlyTrashed()->get())
+            'removed' => true
         ]);
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Soft delete the specified resource from storage.
      *
-     * @param  int  $comment
+     * @param  Post $post
      * @return \Illuminate\Http\JsonResponse
      */
     public function delete(Post $post)
@@ -162,9 +126,9 @@ class PostController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Restore the specified resource.
      *
-     * @param  int  $comment
+     * @param  int  $post_id
      * @return \Illuminate\Http\JsonResponse
      */
     public function restore($post_id)
