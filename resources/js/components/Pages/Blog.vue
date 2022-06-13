@@ -17,16 +17,25 @@
             </div>
         </div>
 
-        <PostList :outsidePosts="posts" :updatePosts="updatePosts" :loadPosts="getBlog"/>
+        <h3 v-if="posts.items.length">All post list ({{posts.items.length}})</h3>
+        <h3 v-else>Posts not found...</h3>
+        <InfiniteScroll :loadItemsFn="getBlogWithPosts" :allItemsLoaded="!posts.loaded">
+            <div v-for="post in posts.items" class="">
+                <Post v-bind:post="post" :removePost="removePost"/>
+            </div>
+        </InfiniteScroll>
     </div>
 </template>
 
 <script>
-import PostList from "./PostList";
+import Post from "../Items/Post";
+import InfiniteScroll from "../Items/InfiniteScroll";
+
 export default {
     name: "Blog",
     components: {
-        PostList
+        Post,
+        InfiniteScroll
     },
     data() {
         return {
@@ -38,7 +47,7 @@ export default {
         };
     },
     methods: {
-        async getBlog(url = "/api/blogs/"+this.$route.params.id+'?skip_posts_count='+this.posts.items.length) {
+        async getBlogWithPosts(url = "/api/blogs/"+this.$route.params.id+'?skip_posts_count='+this.posts.items.length) {
             if(this.posts.loaded){
                 return;
             }
@@ -54,19 +63,12 @@ export default {
                 )
                 const data = await res.json();
 
-                if(data.status === 'error'){
-                    this.errors = Object.entries(data.errors).map(error => {
-                        const [key, value] = error;
-                        return {[key]: value[0]};
-                    });
-                }
-
                 if(data.data){
                     this.blog = data.data;
                 }
 
                 if(data.postsData){
-                    for(const [key, val] of Object.entries(data.postsData.data)){
+                    for(const val of Object.values(data.postsData.data)){
                         this.posts.items.push(val);
                     }
                 }
@@ -77,6 +79,33 @@ export default {
 
                 this.posts.page++;
 
+                return {success: true};
+            } catch (err) {
+                console.log('err', err);
+            }
+        },
+
+        async removePost(id) {
+            this.errors = {};
+            try {
+                const res = await fetch(
+                    "/api/posts/"+id+"/delete",
+                    {
+                        method: "POST",
+                        headers: this.$root.fetch_headers_config
+                    }
+                )
+                const data = await res.json();
+
+                if (data.removed) {
+                    this.posts.items = this.posts.items.filter(post => post.id !== id);
+                    console.log(!!this.$el.lastChild);
+                    console.log(this.$root.isElementScrolledToBottomLine(this.$el.lastChild));
+                    if(this.$root.isElementScrolledToBottomLine(this.$el.lastChild)){
+                        this.getBlogWithPosts();
+                    }
+                }
+
             } catch (err) {
                 console.log('err', err)
             }
@@ -84,10 +113,7 @@ export default {
 
         updatePosts(posts) {
             this.posts.items = posts;
-        }
-    },
-    mounted() {
-        // this.getBlog();
+        },
     }
 }
 </script>

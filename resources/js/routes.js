@@ -2,7 +2,6 @@ import Login from './components/Pages/Login';
 import Register from './components/Pages/Register';
 import BlogList from './components/Pages/BlogList';
 import Blog from './components/Pages/Blog';
-import PostList from './components/Pages/PostList';
 import Main from './components/Pages/Main';
 import Post from './components/Pages/Post';
 import Account from './components/Pages/Account/Main';
@@ -14,7 +13,6 @@ export default {
         {
             path: '/',
             component: Main,
-            name: 'main',
             children: [
                 {
                     path: '/',

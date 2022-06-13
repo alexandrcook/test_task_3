@@ -1,8 +1,9 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import routes from './../js/routes';
+import infiniteScroll from 'vue-infinite-scroll';
 
-var infiniteScroll =  require('vue-infinite-scroll');
+// var infiniteScroll =  require('vue-infinite-scroll');
 
 Vue.use(infiniteScroll);
 Vue.use(VueRouter);
@@ -47,6 +48,13 @@ let app = new Vue({
                 localStorage.setItem('user', JSON.stringify(this.user));
                 this.updateFetchHeaderInfo();
             }
+        },
+        isElementScrolledToBottomLine(el, distanceToBottomLine = 200){
+            let rect = el.getBoundingClientRect();
+            let elemTop = rect.top;
+            let elemBottom = rect.bottom;
+
+            return elemTop < (window.innerHeight) && elemBottom >= 0;
         }
     },
     beforeMount() {

@@ -1,8 +1,8 @@
 <template>
     <div class="mb-5">
         <h3>Post </h3>
-        <div v-if="post">
-            <div class="card card-header mb-4">
+        <div>
+            <div v-if="post" class="card card-header mb-4">
                 <h5 class="card-title">#{{post.id}} {{post.subject}} /writed by [{{post.blog.user.username}}]/</h5>
                 <div class="card-title">
                     Author <span v-if="post && post.blog.user.username">[{{post.blog.user.username}}]</span> info:
@@ -17,7 +17,7 @@
                 <div>See all post in <router-link class="text-decoration-underline" :to="{name: 'blog', params:{id: post.blog.id}}"> *{{post.blog.name}}* </router-link> blog</div>
             </div>
 
-            <div v-if="comments">
+            <div>
                 <hr>
                 <h4>Commentaries</h4>
 
@@ -43,41 +43,28 @@
                         ... only registered / logged user could write commentaries
                     <hr>
                 </div>
-
-                <div v-for="comment in comments.items" class="">
-                    <div class="card mb-2">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    {{comment.message}}
-                                </div>
-
-                                <div v-if="is_admin">
-                                    <form @submit.prevent="removeCommentary(comment.id)">
-                                        <button class="btn btn-danger" type="submit">Remove</button>
-                                    </form>
-                                </div>
-                            </div>
-                            <hr>
-                            <div class="d-flex justify-content-between">
-                                <div class="d-inline mr-2">id:{{comment.id}}</div>
-                                <div class="text-right">commented by {{comment.user.name}}</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
+            <InfiniteScroll :loadItemsFn="getPost" :allItemsLoaded="!comments.loaded">
+                <div v-for="comment in comments.items" class="">
+                    <Commentary v-bind:comment="comment" :removeCommentary="removeCommentary"></Commentary>
+                </div>
+            </InfiniteScroll>
         </div>
 
-        <div v-if="!comments.loaded" v-infinite-scroll="getPost" infinite-scroll-disabled="busy" infinite-scroll-distance="1">
-            Loading...
-        </div>
     </div>
 </template>
 
 <script>
+
+import InfiniteScroll from "../Items/InfiniteScroll";
+import Commentary from "../Items/Commentary";
+
 export default {
     name: "Post",
+    components: {
+        InfiniteScroll,
+        Commentary
+    },
     data() {
         return {
             post: null,
@@ -90,8 +77,7 @@ export default {
             },
             formErrors: {
                 comment: null
-            },
-            is_admin: this.$root.user.is_admin
+            }
         };
     },
     methods: {

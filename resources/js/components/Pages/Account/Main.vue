@@ -214,6 +214,7 @@ export default {
                 if(data.data){
                     this.formData.blog.name = '';
                     this.getUsersBlogs();
+                    this.$router.push({name: 'blogs'});
                 }
 
             } catch (err) {
@@ -303,20 +304,6 @@ export default {
 
                 if (data.removed) {
                     this.getTrashedItems();
-
-                    // switch (type) {
-                    //     case 'blog': {
-                    //         this.removeBlog('blogs', id);
-                    //         break;
-                    //     }
-                    //     case 'post': {
-                    //         this.removePost('posts', id);
-                    //         break;
-                    //     }
-                    //     default: {
-                    //         this.removeItem('comments', id);
-                    //     }
-                    // }
                 }
 
             } catch (err) {
@@ -336,13 +323,6 @@ export default {
                 )
                 const data = await res.json();
 
-                if (data.errors) {
-                    this.errors = Object.entries(data.errors).map(error => {
-                        const [key, value] = error;
-                        return {[key]: value[0]};
-                    });
-                }
-
                 if (data.restored) {
                     this.getTrashedItems();
                 }
@@ -356,41 +336,15 @@ export default {
             this.formErrors.blog = null;
             this.formErrors.post = null;
         },
-        // removeItem(type, id) {
-        //     console.log(111, type, id)
-        //     this.trashedItems[type] = this.trashedItems[type].filter(item => item.id !== id);
-        // },
-        //
-        // removePost(type, id) {
-        //     this.removeItem(type, id);
-        //     this.trashedItems.comments = this.trashedItems.comments.filter(
-        //         comment => comment.post_id !== id
-        //     );
-        // },
-        //
-        // removeBlog(type, id) {
-        //     const removedPosts = [];
-        //     this.removeItem(type, id);
-        //     this.trashedItems.posts = this.trashedItems.posts.filter(post => {
-        //         if (post.blog_id !== id) {
-        //             removedPosts.push(post.id);
-        //         }
-        //         return post.blog_id !== id
-        //     });
-        //     this.trashedItems.comments = this.trashedItems.comments.filter(
-        //         comment => !removedPosts.includes(comment.post_id)
-        //     );
-        // },
     },
     mounted() {
-
         if(!this.$root.user.id){
             this.$router.push({name: 'login'})
         }
+        this.getUsersBlogs();
         if(this.$root.user.is_admin){
             this.getTrashedItems();
         }
-        this.getUsersBlogs();
     }
 }
 </script>

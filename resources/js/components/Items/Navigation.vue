@@ -39,10 +39,7 @@
 
 <script>
 export default {
-    name: "Navigation",
-    mounted() {
-        console.log(123213132312, this.$route);
-    }
+    name: "Navigation"
 }
 </script>
 

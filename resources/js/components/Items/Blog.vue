@@ -24,7 +24,10 @@
 
 export default {
     name: "Blog",
-    props: ['blog'],
+    props: {
+        blog: {type: Object},
+        onBlogDelete: {type: Function}
+    },
     methods: {
         async removeBlog(id) {
             this.errors = {};
@@ -47,6 +50,8 @@ export default {
 
                 if (data.removed) {
                     this.$el.remove();
+                    console.log(123123123, 'test');
+                    this.onBlogDelete();
                 }
 
             } catch (err) {

@@ -1,23 +1,23 @@
 <template>
     <div>
         <h3>All blogs list</h3>
-        <div v-for="blog in blogs.items" class="">
-            <Blog v-bind:blog="blog"/>
-        </div>
-
-        <div v-if="!blogs.loaded" v-infinite-scroll="getBlogs" infinite-scroll-disabled="busy" infinite-scroll-distance="1">
-            Loading...
-        </div>
+        <InfiniteScroll :loadItemsFn="getBlogs" :allItemsLoaded="!blogs.loaded">
+            <div v-for="blog in blogs.items" class="">
+                <Blog v-bind:blog="blog" :onBlogDelete="handleBlogDelete"/>
+            </div>
+        </InfiniteScroll>
     </div>
 </template>
 
 <script>
 
 import Blog from "../Items/Blog";
+import InfiniteScroll from "../Items/InfiniteScroll";
 
 export default {
     name: "BlogList",
     components: {
+        InfiniteScroll,
         Blog
     },
     data() {
@@ -30,13 +30,13 @@ export default {
         };
     },
     methods: {
-        async getBlogs(url = "/api/blogs?skip_blogs_count="+this.blogs.items.length) {
+        async getBlogs() {
             if(this.blogs.loaded){
                 return;
             }
             try {
                 const res = await fetch(
-                    url,
+                    `/api/blogs?skip_blogs_count=${this.blogs.items.length}`,
                     {
                         method: "GET",
                         headers: this.$root.fetch_headers_config
@@ -45,7 +45,7 @@ export default {
                 const data = await res.json();
 
                 if(data.data){
-                    for(const [key, val] of Object.entries(data.data)){
+                    for(const val of Object.values(data.data)){
                         this.blogs.items.push(val);
                     }
                 }
@@ -56,10 +56,17 @@ export default {
 
                 this.blogs.page++;
 
+                return {success: true};
             } catch (err) {
                 console.log('err', err)
             }
         },
-    }
+        handleBlogDelete(){
+            if(this.$root.isElementScrolledToBottomLine(this.$el.lastChild)){
+                this.getBlogs();
+            }
+        },
+    },
+
 }
 </script>
