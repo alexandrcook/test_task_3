@@ -14,7 +14,7 @@
                 <hr>
                 <p class="card-title">Body: {{post.body}}</p>
                 <hr>
-                <div>See all post in <a class="text-decoration-underline" :href="'/blogs/'+post.blog.id"> *{{post.blog.name}}* </a> blog</div>
+                <div>See all post in <router-link class="text-decoration-underline" :to="{name: 'blog', params:{id: post.blog.id}}"> *{{post.blog.name}}* </router-link> blog</div>
             </div>
 
             <div v-if="comments">
@@ -190,7 +190,6 @@ export default {
                 }
 
                 if (data.removed) {
-                    console.log(this.$el);
                     this.comments.items = this.comments.items.filter(item => item.id !== id);
                 }
 

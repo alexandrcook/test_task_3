@@ -12,7 +12,7 @@
             <div class="card-title">
                 <div>{{post.subject}}</div>
                 <div v-if="post.blog">
-                    in <a class="text-decoration-underline" :href="'/blogs/'+post.blog.id">"{{post.blog.name}}"</a> blog
+                    in <router-link class="text-decoration-underline" :to="{name: 'blog', params: {id: post.blog.id}}">"{{post.blog.name}}"</router-link> blog
                 </div>
             </div>
             <hr>
@@ -21,7 +21,7 @@
             </p>
             <div class="d-flex justify-content-between">
                 <div class="d-flex">
-                    <a class="btn btn-info mr-5" :href="'/posts/'+post.id">See full post</a>
+                    <router-link class="btn btn-info mr-5" :to="{name: 'post', params: {blog_id: $route.params.id, id: post.id}}">See full post</router-link>
                     <div v-if="this.$root.user.is_admin">
                         <form @submit.prevent="removePost(post.id)">
                             <button class="btn btn-danger" type="submit">Remove post</button>

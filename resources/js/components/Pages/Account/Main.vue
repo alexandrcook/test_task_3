@@ -165,9 +165,6 @@ export default {
     },
     methods: {
         async getUsersBlogs() {
-
-            console.log(this.$root.fetch_headers_config);
-
             try {
                 const res = await fetch(
                     '/api/user/blogs/',
@@ -179,7 +176,6 @@ export default {
                 const data = await res.json();
 
                 if(res.status === 401){
-                    console.log(this.$root.user);
                     this.$root.logoutUser();
                 }
 
@@ -268,8 +264,6 @@ export default {
                 )
                 const data = await res.json();
 
-                console.log(data);
-
                 if(data.errors){
                     this.formErrors.post = Object.entries(data.errors).map(error => {
                         const [key, value] = error;
@@ -278,7 +272,6 @@ export default {
                 }
 
                 if(data){
-                    console.log('updated removed data');
                     this.trashedItems.blogs = data.trashedBlogs;
                     this.trashedItems.posts = data.trashedPosts;
                     this.trashedItems.comments = data.trashedComments;
@@ -351,7 +344,6 @@ export default {
                 }
 
                 if (data.restored) {
-                    console.log(this.$el);
                     this.getTrashedItems();
                 }
 

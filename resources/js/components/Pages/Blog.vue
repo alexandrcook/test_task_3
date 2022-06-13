@@ -39,7 +39,6 @@ export default {
     },
     methods: {
         async getBlog(url = "/api/blogs/"+this.$route.params.id+'?skip_posts_count='+this.posts.items.length) {
-            console.log(1111)
             if(this.posts.loaded){
                 return;
             }
@@ -63,7 +62,6 @@ export default {
                 }
 
                 if(data.data){
-                    console.log(data.data);
                     this.blog = data.data;
                 }
 

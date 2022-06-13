@@ -22,24 +22,8 @@
         </style>
     </head>
     <body>
-        <div id="app" class="mt-5">
-            <div class="container d-flex justify-content-between mb-4">
-                <div>
-                    <router-link to="/account">My account</router-link>
-                    <br>
-                    <router-link to="/blogs">All blogs</router-link>
-                    <br>
-                    <router-link to="/posts">All posts</router-link>
-                </div>
-                <div>
-                    <router-link to="/login" class="mr-2">Login</router-link>/
-                    <router-link to="/register" class="ml-1">Register</router-link>
-                </div>
-            </div>
-            <hr>
-            <div class="container">
-                <router-view></router-view>
-            </div>
+        <div id="app">
+            <router-view></router-view>
         </div>
         <script src="{{asset('js/app.js')}}"></script>
     </body>
