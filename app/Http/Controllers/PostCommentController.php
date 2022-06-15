@@ -2,44 +2,83 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\PostCommentStoreRequest;
+use App\Http\Requests\StorePostCommentRequest;
 use App\Http\Resources\CommentResource;
-use App\Models\Comment;
+use App\Models\{Comment, Post};
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class PostCommentController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @param  int  $post_id
-     * @return \Illuminate\Http\Resources\Json\JsonResource
+     * Display a listing of commentaries for specific post.
      */
-    public function index($post_id)
+    public function index(Post $post) : AnonymousResourceCollection
     {
-        $comments = Comment::where(['post_id'=> $post_id, 'comment_id' => null ])
-            ->with('childComments')
-            ->paginate()
-            ->withPath("/posts/{$post_id}/comments");
-
-        return new CommentResource($comments);
+        return CommentResource::collection(
+            $post->comments()
+                ->with('user')
+                ->latest('id')
+                ->cursorPaginate()
+        );
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  PostCommentStoreRequest $request
-     * @param  int $post_id
-     * @return \Illuminate\Http\Resources\Json\JsonResource
+     * Display a listing of trashed commentaries.
      */
-    public function store(PostCommentStoreRequest $request, $post_id)
+    public function trashed() : AnonymousResourceCollection
     {
-        $comment = Comment::create(array_merge([
-            'post_id' => $post_id,
-            'user_id' => $request->user()->id
-        ], $request->all()));
+        return CommentResource::collection(
+            Comment::onlyTrashed()
+                ->with(['post' => fn($q) => $q->with('blog')])
+                ->latest('id')
+                ->cursorPaginate()
+        );
+    }
 
-        $commentWithUser = Comment::where('id', $comment->id)->with('user')->first();
+    /**
+     * Store a newly created commentary.
+     */
+    public function store(StorePostCommentRequest $request, Post $post) : CommentResource
+    {
+        return new CommentResource(
+            $post->comments()
+                ->create(array_merge(['user_id' => $request->user()->id], $request->all()))
+                ->load('user')
+        );
+    }
 
-        return new CommentResource($commentWithUser);
+    /**
+     * Soft delete the specified resource.
+     */
+    public function delete(Comment $comment) : JsonResponse
+    {
+        $comment->delete();
+
+        return response()->json(['removed' => true]);
+    }
+
+    /**
+     * Restore the specified resource.
+     */
+    public function restore(int $comment_id) : JsonResponse
+    {
+        $comment = Comment::onlyTrashed()->where('id', $comment_id)->first();
+
+        $comment->restore();
+
+        return response()->json(['restored' => true]);
+    }
+
+    /**
+     * Destroy the specified resource.
+     */
+    public function destroy(int $comment_id) : JsonResponse
+    {
+        $comment = Comment::onlyTrashed()->where('id', $comment_id)->first();
+
+        $comment->forceDelete();
+
+        return response()->json(['removed' => true]);
     }
 }

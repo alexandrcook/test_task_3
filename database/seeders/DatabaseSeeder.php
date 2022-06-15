@@ -19,7 +19,10 @@ class DatabaseSeeder extends Seeder
             $adminUser = User::factory(1)->create([
                 'email' => 'admin@admin.admin',
                 'password' => Hash::make('admin'),
-                'is_admin' => true
+                'is_admin' => true,
+                'name' => 'Adminname',
+                'surname' => 'Adminsurname',
+                'nickname' => 'Adminnickname'
             ]);
             $adminUser->first()->createToken('api_token',['admin']);
         }

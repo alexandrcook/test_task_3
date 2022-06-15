@@ -35,18 +35,8 @@
 </template>
 
 <script>
-
 export default {
     name: "Post",
-    props: ['post', 'removePost'],
-    methods: {
-
-    }
+    props: ['post', 'removePost']
 }
-
-
 </script>
-
-<style scoped>
-
-</style>

@@ -3,16 +3,13 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Models\UserAddress;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
+use App\Models\{User, UserAddress};
+use Illuminate\Http\{JsonResponse, Request};
+use Illuminate\Support\Facades\{Hash, Validator};
 
 class CustomRegisterController extends Controller
 {
-    public function register(Request $request)
+    public function register(Request $request) : JsonResponse
     {
         //todo: use UserRegisterRequest file for request validation
         $validator = Validator::make($request->all(),[
@@ -52,8 +49,5 @@ class CustomRegisterController extends Controller
                 'api_token' => $token
             ]
         ]);
-
     }
-
-
 }

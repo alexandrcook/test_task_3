@@ -2,111 +2,91 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\{StoreBlogRequest,UpdateBlogRequest};
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use App\Http\Requests\StoreBlogRequest;
 use App\Http\Resources\BlogResource;
-use App\Http\Resources\CommentResource;
-use App\Http\Resources\PostCollection;
-use App\Http\Resources\PostResource;
 use App\Models\Blog;
-use App\Models\Comment;
-use App\Models\Post;
-use Carbon\Carbon;
-use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class BlogController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Resources\Json\JsonResource
+     * Display a listing of blogs.
      */
-    public function index()
+    public function index() : AnonymousResourceCollection
     {
-        $skip_blogs_count = request()->get('skip_blogs_count');
-        $take_blogs_count = 10;
-
-        $allBlogsLoaded = !Blog::query()
-            ->skip($skip_blogs_count+$take_blogs_count+1)
-            ->take(1)
-            ->get()
-            ->count();
-
         return BlogResource::collection(
-            Blog::with(['user', 'posts'])
-                ->latest()
-                ->orderBy('id', 'desc')
-                ->skip($skip_blogs_count)
-                ->take($take_blogs_count)
-                ->get()
-        )->additional([
-            'allBlogsLoaded' => $allBlogsLoaded
-        ]);
+                Blog::with(['user', 'posts'])
+                ->latest('id')
+                ->cursorPaginate()
+        );
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  StoreBlogRequest $request
-     * @return \Illuminate\Http\Resources\Json\JsonResource
+     * Display a listing of the trashed blogs.
      */
-    public function store(StoreBlogRequest $request)
+    public function trashed() : AnonymousResourceCollection
     {
-        $additionalInputs = ([
-            'user_id' => $request->user()->id,
-            'created_at' => Carbon::now()->toDateTimeString(),
-            'updated_at' => Carbon::now()->toDateTimeString()
-        ]);
-
-        return new BlogResource(Blog::create(array_merge($request->all(), $additionalInputs)));
+        return BlogResource::collection(
+            Blog::onlyTrashed()
+                ->latest('id')
+                ->cursorPaginate()
+        );
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param int $blog_id
-     * @return \Illuminate\Http\Resources\Json\JsonResource
+     * Store a newly created blog.
      */
-    public function show($blog_id)
+    public function store(StoreBlogRequest $request) : BlogResource
     {
-        $blog = Blog::where('id', $blog_id)
-            ->with(['user', 'posts'])
-            ->first();
+        return new BlogResource(
+            Blog::create(
+                array_merge(
+                    $request->all(),
+                    ['user_id' => $request->user()->id])
+            )->load('user')
+        );
+    }
+
+    /**
+     * Display the specified blog.
+     */
+    public function show(Blog $blog) : BlogResource
+    {
+        return new BlogResource($blog->load('user'));
+    }
+
+    /**
+     * Soft delete the specified blog.
+     */
+    public function delete(Blog $blog) : JsonResponse
+    {
+        $blog->delete();
+
+        return response()->json(['removed' => true]);
+    }
+
+    /**
+     * Restore the specified soft deleted blog.
+     */
+    public function restore(int $blog_id) : JsonResponse
+    {
+        $blog = Blog::onlyTrashed()->where('id', $blog_id)->first();
 
         if(!$blog){
             throw new NotFoundHttpException();
         }
 
-        $skip_posts_count = request()->get('skip_posts_count');
-        $take_posts_count = 10;
+        $blog->restore();
 
-        $paginatedPosts = Post::where('blog_id', $blog_id)
-            ->with('comments')
-            ->latest()
-            ->orderBy('id', 'desc')
-            ->skip($skip_posts_count)
-            ->take($take_posts_count)
-            ->get();
-
-        $allPostsLoaded = !Post::where('blog_id', $blog_id)
-            ->skip($skip_posts_count+$take_posts_count+1)
-            ->take(1)
-            ->get()
-            ->count();
-
-        return (new BlogResource($blog))->additional([
-            'postsData' => (new PostCollection($paginatedPosts))->response()->getData(),
-            'allPostsLoaded' => $allPostsLoaded
-        ]);
+        return response()->json(['restored' => true]);
     }
 
     /**
-     * Destroy the specified resource from storage.
-     *
-     * @param  int  $blog_id
-     * @return \Illuminate\Http\JsonResponse
+     * Destroy the specified blog.
      */
-    public function destroy($blog_id)
+    public function destroy($blog_id) : JsonResponse
     {
         $blog = Blog::onlyTrashed()->where('id', $blog_id)->first();
 
@@ -116,69 +96,6 @@ class BlogController extends Controller
 
         $blog->forceDelete();
 
-        return response()->json([
-            'removed' => true
-        ]);
-
-    }
-
-    /**
-     * Restore the specified soft deleted resource.
-     *
-     * @param  Blog $blog
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function delete(Blog $blog)
-    {
-        $blog->delete();
-        if($blog->posts){
-            $blog->posts->each->delete();
-            foreach($blog->posts as $post){
-                $post->comments->each->delete(); //todo: probably we could use some listener for cascade softDelete
-            }
-        }
-
-        return response()->json([
-            'removed' => true
-        ]);
-    }
-
-    /**
-     * Soft delete the specified resource from storage.
-     *
-     * @param  int  $comment
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function restore($blog_id)
-    {
-        $blog = Blog::onlyTrashed()->where('id', $blog_id)->first();
-
-        if(!$blog){
-            throw new NotFoundHttpException();
-        }
-
-        $blog->restore();
-        foreach($blog->posts()->withTrashed()->get() as $post){
-            $post->restore();
-            foreach ($post->comments()->withTrashed()->get() as $comment){
-                $comment->restore();
-            }
-        }
-
-        return response()->json([
-            'restored' => true
-        ]);
-    }
-
-
-    /**
-     * Get blogs for the specified user.
-     *
-     * @param  Request $request
-     * @return \Illuminate\Http\Resources\Json\JsonResource
-     */
-    public function getUserBlogs(Request $request)
-    {
-        return BlogResource::collection(Blog::where('user_id', $request->user()->id)->get());
+        return response()->json(['removed' => true]);
     }
 }

@@ -12,7 +12,7 @@ class CustomResourceRegistrar extends OriginalRegistrar
      *
      * @var array
      */
-    protected $resourceDefaults = ['index', 'create', 'store', 'show', 'edit', 'update', 'destroy', 'delete', 'restore'];
+    protected $resourceDefaults = ['index', 'create', 'store', 'show', 'edit', 'update', 'destroy', 'delete', 'restore', 'trashed'];
 
 
     /**
@@ -24,26 +24,25 @@ class CustomResourceRegistrar extends OriginalRegistrar
      * @param  array   $options
      * @return \Illuminate\Routing\Route
      */
-    protected function addResourceData($name, $base, $controller, $options)
-    {
-        $uri = $this->getResourceUri($name).'/data.json';
-
-        $action = $this->getResourceAction($name, $controller, 'data', $options);
-
-        return $this->router->post($uri, $action);
-    }
 
     protected function addResourceDelete($name, $base, $controller, $options)
     {
-        $uri = $this->getResourceUri($name).'/{'.substr($name, 0, -1).'}/delete';
+        $uri = $base.'s/{'.$base.'}/delete';
 
         return $this->router->post($uri, $this->getResourceAction($name, $controller, 'delete', $options));
     }
 
     protected function addResourceRestore($name, $base, $controller, $options)
     {
-        $uri = $this->getResourceUri($name).'/{'.substr($name, 0, -1).'}/restore';
+        $uri = $base.'s/{'.$base.'}/restore';
 
         return $this->router->post($uri, $this->getResourceAction($name, $controller, 'restore', $options));
+    }
+
+    protected function addResourceTrashed($name, $base, $controller, $options)
+    {
+        $uri = $base.'s/trashed';
+
+        return $this->router->post($uri, $this->getResourceAction($name, $controller, 'trashed', $options));
     }
 }

@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\{BlogController, BlogPostController, PostCommentController};
+use App\Http\Controllers\Auth\{CustomRegisterController, CustomLoginController};
 
 /*
 |--------------------------------------------------------------------------
@@ -13,37 +15,24 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::post('/register', [\App\Http\Controllers\Auth\CustomRegisterController::class, 'register'])->name('api.register');
-Route::post('/login', [\App\Http\Controllers\Auth\CustomLoginController::class, 'login'])->name('api.login');
+Route::post('/register', [CustomRegisterController::class, 'register'])->name('api.register');
+Route::post('/login', [CustomLoginController::class, 'login'])->name('api.login');
 
-Route::resource('blogs', \App\Http\Controllers\BlogController::class)
-    ->only(['index','show']);
-
-Route::resource('posts', \App\Http\Controllers\PostController::class)
-    ->only(['index','show']);
+Route::resource('blogs', BlogController::class)->only(['index','show']);
+Route::resource('blogs.posts', BlogPostController::class)->shallow()->only(['index','show']);
+Route::resource('posts.comments', PostCommentController::class)->shallow()->only(['index']);
 
 Route::group(['middleware' => 'auth:sanctum'], function (){
-    //get blogs list for specific user
-    Route::post('/user/blogs', [\App\Http\Controllers\BlogController::class, 'getUserBlogs']);
-
-    Route::resource('blogs', \App\Http\Controllers\BlogController::class)->only(['store']);
-
-    Route::resource('posts', \App\Http\Controllers\PostController::class)->only(['store']);
-
-    Route::resource('posts.comments', \App\Http\Controllers\PostCommentController::class)->only(['store']);
-
+    Route::resource('blogs', BlogController::class)->only(['store']);
+    Route::resource('blogs.posts', BlogPostController::class)->shallow()->only(['store']);
+    Route::resource('posts.comments', PostCommentController::class)->shallow()->only(['store']);
 });
 
 Route::group(['middleware' => ['auth:sanctum', 'ability:admin']], function (){
-
-    Route::resource('blogs', \App\Http\Controllers\BlogController::class)
-        ->only(['destroy', 'delete', 'restore']);
-
-    Route::resource('posts', \App\Http\Controllers\PostController::class)
-        ->only(['destroy', 'delete', 'restore']);
-
-    Route::resource('comments', \App\Http\Controllers\CommentController::class)
-        ->only(['destroy', 'delete', 'restore']);
-
-    Route::post('/trashed', [\App\Http\Controllers\TrashController::class, 'getTrashedItems']);
+    Route::resource('blogs', BlogController::class)
+        ->only(['destroy', 'delete', 'restore', 'trashed']);
+    Route::resource('blog.posts', BlogPostController::class)
+        ->shallow()->only(['destroy', 'delete', 'restore', 'trashed']);
+    Route::resource('comments', PostCommentController::class)
+        ->shallow()->only(['destroy', 'delete', 'restore', 'trashed']);
 });

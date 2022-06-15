@@ -3,13 +3,12 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\{JsonResponse, Request};
+use Illuminate\Support\Facades\{Auth, Validator};
 
 class CustomLoginController extends Controller
 {
-    public function login(Request $request)
+    public function login(Request $request) : JsonResponse
     {
         //todo: use UserLoginRequest file for request validation
         $validator = Validator::make($request->all(),[
@@ -40,9 +39,5 @@ class CustomLoginController extends Controller
                 'errors' => $validator->errors()
             ]);
         }
-    }
-
-    public function logout(){
-
     }
 }

@@ -27,4 +27,19 @@ class Post extends Model
     {
         return static::where('deleted_at', '<=', now()->subHours(3));
     }
+
+    public static function boot()
+    {
+        parent::boot();
+
+        static::deleted(function ($model) {
+            $model->load('comments');
+            $model->comments()->delete();
+        });
+
+        static::restored(function ($model) {
+            $model->load('comments');
+            $model->comments()->restore();
+        });
+    }
 }

@@ -1,7 +1,7 @@
 <template>
     <div class="container d-flex justify-content-between mt-4 mb-4">
         <div>
-            <div v-if="$route.name === 'blog' || $route.name === 'post' || $route.name === 'account'">
+            <div v-if="['blog','post','account','login','register'].includes($route.name)">
                 <router-link :to="{name: 'blogs'}" class="d-inline">Home</router-link>
 
                 <div class="d-inline" v-if="$route.name === 'blog' || $route.name === 'post'">

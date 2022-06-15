@@ -1,293 +1,163 @@
 <template>
-    <div>
-        <div v-if="formsVisibility.blog" class="mb-5">
-            <h3>Create new blog</h3>
-            <form @submit.prevent="createBlog">
-                <div>
-                    <label for="name">Name</label>
-                    <input class="form-control" name="name" v-model="formData.blog.name" placeholder="name">
-                </div>
-                <br>
-                <button class="btn btn-info" type="submit">Create new blog</button>
-            </form>
-            <p v-if="formErrors.blog" class="mt-4">
-                <b>Please correct the following error(s):</b>
-                <ul>
-                    <li v-for="error in formErrors.blog">{{ error }}</li>
-                </ul>
-            </p>
-        </div>
-
-        <div v-if="userBlogs.length">
-            <h3>Create new Post</h3>
-            <form @submit.prevent="createPost">
-                <div>
-                    <label for="blog">Select blog</label>
-                    <select v-model="formData.post.blog_id" class="form-control">
-                        <option v-for="userBlog in userBlogs" :value="userBlog.id">{{userBlog.name}}</option>
-                    </select>
-                </div>
-                <br>
-                <div>
-                    <label for="subject">Subject</label>
-                    <input class="form-control" name="subject" v-model="formData.post.subject" placeholder="subject">
-                </div>
-                <br>
-                <div>
-                    <label for="body">Body</label>
-                    <textarea class="form-control" name="body" v-model="formData.post.body" placeholder="body"></textarea>
-                </div>
-                <br>
-                <button class="btn btn-info" type="submit">Create new post</button>
-            </form>
-            <p v-if="formErrors.post" class="mt-4">
-                <b>Please correct the following error(s):</b>
-                <ul>
-                    <li v-for="error in formErrors.post">{{ error }}</li>
-                </ul>
-            </p>
-        </div>
-        <div v-if="!userBlogs.length">
-            <hr>
-            Please create at least one "Blog" to create first 'Post'
-            <hr>
-        </div>
-
-        <br>
+    <div class="mb-5">
         <div v-if="this.$root.user.is_admin">
-
-            <div v-if="this.trashedItems.blogs.length">
-                <hr>
-                <h5>Trashed Blogs List [{{this.trashedItems.blogs.length}}]:</h5>
-                <br>
-                <div v-for="blog in this.trashedItems.blogs">
-                    <div class="d-flex justify-content-between mb-2">
-                        <div>
-                            id: {{blog.id}} - {{blog.name.slice(0,20)}}...
-                        </div>
-                        <div class="d-flex">
-                            <div class="mt-2 mr-2">(deleted at {{blog.deleted_at}})</div>
-                            <form @submit.prevent="restore('blog', blog.id)">
-                                <button type="submit" class="btn btn-success mr-2">Restore</button>
-                            </form>
-
-                            <form @submit.prevent="forceRemove('blog', blog.id)">
-                                <button type="submit" class="btn btn-danger">Force DELETE!!!</button>
-                            </form>
-                        </div>
+            <!-- Blogs -->
+            <div v-if="this.trashedBlogs.initialized">
+                <div v-if="this.trashedBlogs.items.length">
+                    <h5>Trashed blogs list [{{this.trashedBlogs.items.length}}]:</h5>
+                    <br>
+                    <div v-for="blog in this.trashedBlogs.items">
+                        <Blog :blog="blog" :restore="restore" :forceRemove="forceRemove"></Blog>
                     </div>
                 </div>
-                <hr>
+                <h5 v-else>Trashed blogs not found...</h5>
+                <button v-if="!this.trashedBlogs.loaded && this.trashedBlogs.initialized" class="btn btn-info" @click="getTrashedItems('blogs')">Load more trashed blogs...</button>
             </div>
+            <!-- Blogs END -->
 
-            <div v-if="this.trashedItems.posts.length">
+            <!-- Posts -->
+            <div v-if="this.trashedPosts.initialized">
                 <hr>
-                <h5>Trashed Posts List [{{this.trashedItems.posts.length}}]:</h5>
-                <br>
-                <div v-for="post in this.trashedItems.posts">
-                    <div class="d-flex justify-content-between mb-2">
-                        <div>
-                            id: {{post.id}} - {{post.body.slice(0,20)}}...
-                        </div>
-                        <div class="d-flex">
-                            <div class="mt-2 mr-2">(deleted at {{post.deleted_at}})</div>
-                            <form @submit.prevent="restore('post', post.id)">
-                                <button type="submit" class="btn btn-success mr-2">Restore</button>
-                            </form>
-
-                            <form @submit.prevent="forceRemove('post', post.id)">
-                                <button type="submit" class="btn btn-danger">Force DELETE!!!</button>
-                            </form>
-                        </div>
+                <div v-if="this.trashedPosts.items.length">
+                    <h5>Trashed posts list [{{this.trashedPosts.items.length}}]:</h5>
+                    <br>
+                    <div v-for="post in this.trashedPosts.items">
+                        <Post :post="post" :restore="restore" :forceRemove="forceRemove"></Post>
                     </div>
                 </div>
-                <hr>
+                <h5 v-else>Trashed posts not found...</h5>
+                <button v-if="!this.trashedPosts.loaded && this.trashedPosts.initialized" class="btn btn-info" @click="getTrashedItems('posts')">Load more trashed posts...</button>
             </div>
+            <!-- Posts End -->
 
-            <div v-if="this.trashedItems.comments.length">
+            <!-- Comments -->
+            <div v-if="this.trashedComments.initialized">
                 <hr>
-                <h5>Trashed Commentaries List [{{this.trashedItems.comments.length}}]:</h5>
-                <br>
-                <div v-for="comment in this.trashedItems.comments">
-                    <div class="d-flex justify-content-between mb-2">
-                        <div>
-                            id: {{comment.id}} - {{comment.message.slice(0,20)}}...
-                        </div>
-                        <div class="d-flex">
-                            <div class="mt-2 mr-2">(deleted at {{comment.deleted_at}})</div>
-                            <form @submit.prevent="restore('comment', comment.id)">
-                                <button type="submit" class="btn btn-success mr-2">Restore</button>
-                            </form>
-
-                            <form @submit.prevent="forceRemove('comment', comment.id)">
-                                <button type="submit" class="btn btn-danger">Force DELETE!!!</button>
-                            </form>
-                        </div>
+                <div v-if="this.trashedComments.items.length">
+                    <h5>Trashed commentaries list [{{this.trashedComments.items.length}}]:</h5>
+                    <br>
+                    <div v-for="comment in this.trashedComments.items">
+                        <Commentary :comment="comment" :restore="restore" :forceRemove="forceRemove"></Commentary>
                     </div>
                 </div>
-                <hr>
+                <h5 v-else>Trashed comments not found...</h5>
+                <button v-if="!this.trashedComments.loaded && this.trashedComments.initialized" class="btn btn-info" @click="getTrashedItems('comments')">Load more trashed commentaries...</button>
             </div>
+            <!-- Comments End -->
+
+            <div v-if="!this.trashedBlogs.initialized
+            || !this.trashedPosts.initialized
+            || !this.trashedComments.initialized"
+            >Loading...</div>
         </div>
-
+        <div v-else>Only admin can see trashed items...</div>
     </div>
 </template>
 
 <script>
+import Blog from "../../Items/Account/Blog";
+import Post from "../../Items/Account/Post";
+import Commentary from "../../Items/Account/Commentary";
 export default {
     name: "Account",
+    components: {
+        Blog,Post,Commentary
+    },
     data() {
         return {
-            userBlogs: [],
-            formData: {
-                blog: {
-                    name: null
-                },
-                post: {
-                    blog_id: null,
-                    subject: null,
-                    body: null
-                }
+            trashedBlogs: {
+                items: [],
+                cursor: null,
+                loaded: false,
+                initialized: false
             },
-            formsVisibility: {
-                blog: true,
-                post: false
+            trashedPosts: {
+                items: [],
+                cursor: null,
+                loaded: false,
+                initialized: false
             },
-            formErrors: {
-                blog: null,
-                post: null
-            },
-            trashedItems: {
-                blogs: [],
-                posts: [],
-                comments: []
+            trashedComments: {
+                items: [],
+                cursor: null,
+                loaded: false,
+                initialized: false
             }
         };
     },
     methods: {
-        async getUsersBlogs() {
+        getAllTrashedItems(){
+          this.getTrashedItems('blogs');
+          this.getTrashedItems('posts');
+          this.getTrashedItems('comments');
+        },
+        async getTrashedItems(type) {
+            let url;
+            switch (type){
+                case 'blogs':
+                    url = `/api/${type}/trashed${this.trashedBlogs.cursor ? `?cursor=${this.trashedBlogs.cursor}` : ''}`;
+                    break;
+                case 'posts':
+                    url = `/api/${type}/trashed${this.trashedPosts.cursor ? `?cursor=${this.trashedPosts.cursor}` : ''}`;
+                    break;
+                case 'comments':
+                    url = `/api/${type}/trashed${this.trashedComments.cursor ? `?cursor=${this.trashedComments.cursor}` : ''}`;
+                    break;
+            }
+
             try {
                 const res = await fetch(
-                    '/api/user/blogs/',
+                    url,
                     {
                         method: "POST",
                         headers: this.$root.fetch_headers_config
                     }
                 )
                 const data = await res.json();
-
-                if(res.status === 401){
-                    this.$root.logoutUser();
-                }
-
-                if(data.data){
-                    this.userBlogs = data.data;
-                }
-
-            } catch (err) {
-                console.log('err', err)
-            }
-        },
-
-        async createBlog() {
-            this.cleanErrors();
-            const { name } = this.formData.blog;
-            try {
-                const res = await fetch(
-                        '/api/blogs/',
-                    {
-                        method: "POST",
-                        headers: this.$root.fetch_headers_config,
-                        body: JSON.stringify({
-                            name
-                        })
-                    }
-                )
-                const data = await res.json();
-
-                if(data.errors){
-                    this.formErrors.blog = Object.entries(data.errors).map(error => {
-                        const [key, value] = error;
-                        return {[key]: value[0]};
-                    });
-                }
-
-                if(data.data){
-                    this.formData.blog.name = '';
-                    this.getUsersBlogs();
-                    this.$router.push({name: 'blogs'});
-                }
-
-            } catch (err) {
-                console.log('err', err)
-            }
-        },
-
-        async createPost() {
-            this.cleanErrors();
-            const { blog_id, subject, body } = this.formData.post;
-            try {
-                const res = await fetch(
-                    '/api/posts/',
-                    {
-                        method: "POST",
-                        headers: this.$root.fetch_headers_config,
-                        body: JSON.stringify({
-                            blog_id, subject, body
-                        })
-                    }
-                )
-                const data = await res.json();
-
-                if(data.errors){
-                    this.formErrors.post = Object.entries(data.errors).map(error => {
-                        const [key, value] = error;
-                        return {[key]: value[0]};
-                    });
-                }
-
-                if(data.data){
-                    this.$router.push({name: 'blog', params: {id: blog_id}});
-                }
-
-            } catch (err) {
-                console.log('err', err)
-            }
-        },
-
-        async getTrashedItems() {
-            try {
-                const res = await fetch(
-                    '/api/trashed/',
-                    {
-                        method: "POST",
-                        headers: this.$root.fetch_headers_config
-                    }
-                )
-                const data = await res.json();
-
-                if(data.errors){
-                    this.formErrors.post = Object.entries(data.errors).map(error => {
-                        const [key, value] = error;
-                        return {[key]: value[0]};
-                    });
-                }
 
                 if(data){
-                    this.trashedItems.blogs = data.trashedBlogs;
-                    this.trashedItems.posts = data.trashedPosts;
-                    this.trashedItems.comments = data.trashedComments;
+                    switch (type){
+                        case 'blogs':
+                            for(const blogItem of data.data){
+                                this.trashedBlogs.items.push(blogItem);
+                            }
+                            this.trashedBlogs.initialized = true;
+                            this.trashedBlogs.cursor = data.meta.next_cursor;
+                            if(!data.meta.next_cursor){
+                                this.trashedBlogs.loaded = true;
+                            }
+                            break;
+                        case 'posts':
+                            for(const postItem of data.data){
+                                this.trashedPosts.items.push(postItem);
+                            }
+                            this.trashedPosts.initialized = true;
+                            this.trashedPosts.cursor = data.meta.next_cursor;
+                            if(!data.meta.next_cursor){
+                                this.trashedPosts.loaded = true;
+                            }
+                            break;
+                        case 'comments':
+                            for(const commentItem of data.data){
+                                this.trashedComments.items.push(commentItem);
+                            }
+                            this.trashedComments.initialized = true;
+                            this.trashedComments.cursor = data.meta.next_cursor;
+                            if(!data.meta.next_cursor){
+                                this.trashedComments.loaded = true;
+                            }
+                            break;
+                    }
                 }
-
             } catch (err) {
                 console.log('err', err)
             }
         },
 
         async forceRemove(type, id) {
-            this.errors = {};
             try {
                 const res = await fetch(
-                    "/api/"+type+"s/"+id,
+                    `/api/${type}s/${id}`,
                     {
                         method: "DELETE",
                         headers: this.$root.fetch_headers_config
@@ -295,15 +165,8 @@ export default {
                 )
                 const data = await res.json();
 
-                if (data.errors) {
-                    this.errors = Object.entries(data.errors).map(error => {
-                        const [key, value] = error;
-                        return {[key]: value[0]};
-                    });
-                }
-
                 if (data.removed) {
-                    this.getTrashedItems();
+                    this.removeElement(type, id);
                 }
 
             } catch (err) {
@@ -312,10 +175,9 @@ export default {
         },
 
         async restore(type, id) {
-            this.errors = {};
             try {
                 const res = await fetch(
-                    "/api/"+type+"s/"+id+"/restore/",
+                    `/api/${type}s/${id}/restore/`,
                     {
                         method: "POST",
                         headers: this.$root.fetch_headers_config
@@ -324,7 +186,7 @@ export default {
                 const data = await res.json();
 
                 if (data.restored) {
-                    this.getTrashedItems();
+                    this.removeElement(type, id);
                 }
 
             } catch (err) {
@@ -332,18 +194,63 @@ export default {
             }
         },
 
-        cleanErrors(){
-            this.formErrors.blog = null;
-            this.formErrors.post = null;
+        removeElementFromArray(array, id) {
+            const itemIndex = array.findIndex(item => item.id === id);
+            if (itemIndex !== -1) {
+                array.splice(itemIndex, 1);
+                return true;
+            }
         },
+
+        removeElement(type, id){
+            switch (type){
+                case 'blog':
+                    this.trashedBlogs.items = this.trashedBlogs.items.filter((blog) => blog.id !== id);
+                    let postsToRemoveIndexes = [];
+                    let postsToRemove = this.trashedPosts.items.filter((post) => post.blog_id === id);
+                    for(const [index, postToRemove] of Object.entries(postsToRemove)){
+                        postsToRemoveIndexes.push(index);
+                        this.trashedComments.items = this.trashedComments.items.filter((comment) => comment.post_id !== postToRemove.id);
+                    }
+                    this.trashedPosts.items = this.trashedPosts.items.filter((post, index) => postsToRemoveIndexes.includes(index));
+                    break;
+                case 'post':
+                    this.trashedPosts.items = this.trashedPosts.items.filter((post) => post.id !== id);
+                    this.trashedComments.items = this.trashedComments.items.filter((comment) => comment.post_id !== id);
+                    break;
+                case 'comment':
+                    this.trashedComments.items = this.trashedComments.items.filter((comment) => comment.id !== id);
+                    break;
+            }
+            if(!this.trashedBlogs.items.length){
+                this.trashedBlogs.cursor = null;
+                if(!this.trashedBlogs.loaded){
+                    this.trashedBlogs.initialized = false;
+                    this.getTrashedItems('blogs');
+                }
+            }
+            if(!this.trashedPosts.items.length){
+                this.trashedPosts.cursor = null;
+                if(!this.trashedPosts.loaded){
+                    this.trashedPosts.initialized = false;
+                    this.getTrashedItems('posts');
+                }
+            }
+            if(!this.trashedComments.items.length){
+                this.trashedComments.cursor = null;
+                if(!this.trashedComments.loaded){
+                    this.trashedComments.initialized = false;
+                    this.getTrashedItems('comments');
+                }
+            }
+        }
     },
     mounted() {
         if(!this.$root.user.id){
             this.$router.push({name: 'login'})
         }
-        this.getUsersBlogs();
         if(this.$root.user.is_admin){
-            this.getTrashedItems();
+            this.getAllTrashedItems();
         }
     }
 }
