@@ -90,8 +90,9 @@ Basically, so it can be tested.
 - Nested Resource Controllers
 - Custom Resource Controller methods
 - Custom Resource routing for custom methods
-- specified Resources, Requests files
+- Resource files for output JSON formatting
+- Requests files for response validation
 - models with nested relations and Soft delete/restore/prunable functional
 - DB seeder
-- Vue
+- Vue (with custom infinite scroll)
 - VueRouter
