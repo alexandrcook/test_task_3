@@ -81,3 +81,17 @@ Create a simple front-end that will enable following by communicating with the A
 Basically, so it can be tested.
 
 <hr>
+
+# What was used for creating:
+
+- Laravel (with Sail (Docker) environment)
+- REST API (with cursor pagination for data lists)
+- Sanctum (simple auth and middleware with admin rules)
+- Nested Resource Controllers
+- Custom Resource Controller methods
+- Custom Resource routing for custom methods
+- specified Resources, Requests files
+- models with nested relations and Soft delete/restore/prunable functional
+- DB seeder
+- Vue
+- VueRouter

@@ -2,7 +2,8 @@
     <div>
         <BlogCreate :blogs="blogs"></BlogCreate>
 
-        <h3>All blogs list</h3>
+        <h3 v-if="blogs.items.length">All blogs list</h3>
+        <h3 v-else>Posts not found...</h3>
         <InfiniteScroll :loadItemsFn="getBlogs" :allItemsLoaded="blogs.loaded">
             <div v-for="blog in blogs.items" class="">
                 <Blog v-bind:blog="blog" :onBlogDelete="handleBlogDelete"/>

@@ -113,6 +113,11 @@ export default {
                         headers: this.$root.fetch_headers_config
                     }
                 )
+
+                if(res.status === 401){
+                    this.$root.logoutUser();
+                }
+
                 const data = await res.json();
 
                 if(data){

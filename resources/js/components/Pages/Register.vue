@@ -54,18 +54,19 @@
             <br>
             <button class="btn btn-info" type="submit">Register</button>
         </form>
-        <p v-if="errors.length">
-            <b>Please correct the following error(s):</b>
-            <ul>
-                <li v-for="error in errors">{{ error }}</li>
-            </ul>
-        </p>
+
+        <div v-if="errors" class="mt-4">
+            <FormErrors :errors="errors" />
+        </div>
     </div>
 </template>
 
 <script>
+import FormErrors from "../Items/Forms/FormErrors";
+import {getDataErrors} from "../Items/Forms/create-item.service";
 export default {
     name: "RegisterPage",
+    components: {FormErrors},
     data() {
         return {
             name: null,
@@ -78,7 +79,7 @@ export default {
             zipcode: null,
             email: null,
             password: null,
-            errors: {}
+            errors: null
         };
     },
     methods: {
@@ -109,18 +110,15 @@ export default {
                 )
                 const data = await res.json();
 
-                if(data.status === 'error'){
-                    this.errors = Object.entries(data.errors).map(error => {
-                        const [key, value] = error;
-                        return {[key]: value[0]};
-                    });
+                if(data.errors){
+                    this.errors = getDataErrors(data);
                 }
 
                 if(data.data){
                     this.$root.user.api_token = data.data.api_token;
                     this.$root.user.is_admin = data.data.is_admin;
                     this.$root.user.id = data.data.user_id;
-                    this.$router.push({name: 'main'});
+                    this.$router.push({name: 'blogs'});
                 }
 
             } catch (err) {

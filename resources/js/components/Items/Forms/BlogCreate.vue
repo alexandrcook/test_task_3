@@ -4,67 +4,53 @@
             <form @submit.prevent="createBlog">
                 <h3>Create new blog</h3>
                 <div class="d-flex justify-content-between">
-                    <input class="form-control w-75 d-inline-block mr-2" name="name" v-model="formData.blog.name" placeholder="name">
+                    <input class="form-control w-75 d-inline-block mr-2" name="name" v-model="formData.name" placeholder="name">
                     <button class="btn btn-info" type="submit">Create new blog</button>
                 </div>
             </form>
-            <div v-if="formErrors.blog" class="mt-4">
-                <b>Please correct the following error(s):</b>
-                <ul>
-                    <li v-for="error in formErrors.blog">{{ error }}</li>
-                </ul>
+            <div v-if="formErrors" class="mt-4">
+                <FormErrors :errors="formErrors" />
             </div>
         </div>
         <div v-else class="mb-4">
-            <h3>Logged users could create new blogs...</h3>
+            <h3>Only logged users can create new blogs...</h3>
             <hr>
         </div>
     </div>
 </template>
 
 <script>
+import FormErrors from "./FormErrors";
+import {createNewBlog, getDataErrors} from "./create-item.service";
+
 export default {
     name: "BlogCreate",
+    components: {
+        FormErrors
+    },
     props: ['blogs'],
     data(){
         return{
             formData: {
-                blog: {
-                    name: null
-                },
+                name: null
             },
-            formErrors: {
-                blog: null
-            },
+            formErrors: null,
         }
     },
     methods: {
         async createBlog() {
-            this.formErrors.blog = null;
-            const { name } = this.formData.blog;
+            this.formErrors = null;
+            const { name } = this.formData;
             try {
-                const res = await fetch(
-                    '/api/blogs/',
-                    {
-                        method: "POST",
-                        headers: this.$root.fetch_headers_config,
-                        body: JSON.stringify({
-                            name
-                        })
-                    }
-                )
-                const data = await res.json();
+                const data = await createNewBlog(name, this.$root.fetch_headers_config);
 
                 if(data.errors){
-                    this.formErrors.blog = Object.entries(data.errors).map(error => {
-                        const [key, value] = error;
-                        return {[key]: value[0]};
-                    });
+                    this.formErrors = getDataErrors(data);
                 }
 
                 if(data.data){
                     console.log(11111, data);
-                    this.formData.blog.name = '';
+                    this.formData.name = '';
                     this.blogs.items.unshift(data.data);
                 }
 

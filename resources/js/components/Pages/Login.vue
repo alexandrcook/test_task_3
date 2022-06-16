@@ -14,23 +14,25 @@
             <br>
             <button class="btn btn-info" type="submit">Login</button>
         </form>
-        <p v-if="errors.length">
-            <b>Please correct the following error(s):</b>
-        <ul>
-            <li v-for="error in errors">{{ error }}</li>
-        </ul>
-        </p>
+
+        <div v-if="errors" class="mt-4">
+            <FormErrors :errors="errors" />
+        </div>
     </div>
 </template>
 
 <script>
+import FormErrors from "../Items/Forms/FormErrors";
+import {getDataErrors} from "../Items/Forms/create-item.service";
+
 export default {
     name: "LoginPage",
+    components: {FormErrors},
     data() {
         return {
             email: null,
             password: null,
-            errors: {}
+            errors: null
         };
     },
     methods: {
@@ -54,10 +56,7 @@ export default {
                 const data = await res.json();
 
                 if(data.errors){
-                    this.errors = Object.entries(data.errors).map(error => {
-                        const [key, value] = error;
-                        return {[key]: value[0]};
-                    });
+                    this.errors = getDataErrors(data);
                 }
 
                 if(data.data){

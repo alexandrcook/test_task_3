@@ -8,11 +8,9 @@
                     <button type="submit" class="btn btn-info">Add</button>
                 </div>
             </form>
-            <div v-if="formErrors.comment" class="mt-4">
-                <b>Please correct the following error(s):</b>
-                <ul>
-                    <li v-for="error in formErrors.comment">{{ error }}</li>
-                </ul>
+
+            <div v-if="formErrors" class="mt-4">
+                <FormErrors :errors="formErrors" />
             </div>
         </div>
         <div v-else>
@@ -24,8 +22,14 @@
 </template>
 
 <script>
+import {createNewComment, getDataErrors} from "./create-item.service";
+import FormErrors from "./FormErrors";
+
 export default {
     name: "CommentCreate",
+    components: {
+        FormErrors,
+    },
     props: ['comments', 'post_id'],
     data() {
         return {
@@ -33,33 +37,18 @@ export default {
                 post_id: this.$props.post_id,
                 message: null
             },
-            formErrors: {
-                comment: null
-            }
+            formErrors: null
         }
     },
     methods: {
         async addComment() {
-            this.formErrors.comment = null;
+            this.formErrors = null;
             const { post_id, message } = this.new_comment;
             try {
-                const res = await fetch(
-                    `/api/posts/${this.$props.post_id}/comments`,
-                    {
-                        method: "POST",
-                        headers: this.$root.fetch_headers_config,
-                        body: JSON.stringify({
-                            post_id, message
-                        })
-                    }
-                )
-                const data = await res.json();
+                const data = await createNewComment(post_id, message, this.$root.fetch_headers_config);
 
                 if(data.errors){
-                    this.formErrors.comment = Object.entries(data.errors).map(error => {
-                        const [key, value] = error;
-                        return {[key]: value[0]};
-                    });
+                    this.formErrors = getDataErrors(data);
                 }
 
                 if(data.data){
